@@ -123,7 +123,7 @@ function App() {
       ))}
       <button onClick={answerShow}>答え確認</button>
       <button onClick={nextQuestion}>次の問題</button>
-      <pre>{JSON.stringify(quizData, null, 2)}</pre>
+
     </div>
   );
 }
