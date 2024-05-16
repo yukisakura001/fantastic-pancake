@@ -96,7 +96,7 @@ function App() {
       }
     });
 
-    const correctAnswers = ans.map((answer, index) => (answer === "◯" ? index : null)).filter((index) => index !== null);
+    const correctAnswers = ans.map((answer, index) => (answer === "〇" ? index : null)).filter((index) => index !== null);
 
     const isCorrect = userAnswers.length === correctAnswers.length && userAnswers.every((answer) => correctAnswers.includes(answer));
 
