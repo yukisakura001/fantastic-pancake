@@ -113,6 +113,7 @@ function App() {
       <input type="file" accept=".csv" onChange={handleFileChange} />
       <button onClick={startQuiz}>問題を表示</button>
       <h1>問題</h1>
+      <p>{id + 1}問目</p>
       <p>{mondai}</p>
       {sentaku.map((option, index) => (
         <div key={index}>
