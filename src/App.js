@@ -28,6 +28,13 @@ function App() {
 
   };
 
+  function ChangeNumberToAlphabets(number){
+    const alphabet = "A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z";
+    const alphabets = alphabet.split(",");
+
+    return alphabets[number];
+}
+
   const startQuiz = () => {
     Papa.parse(fileContent, {
       header: true,
@@ -39,6 +46,7 @@ function App() {
         let marubatuData = [];
 
         for (let i = 0; i < originData.length; i++) {
+          // A. to  1. convert
           if (i === 0) {
             keyWord = originData[i]["設問"];
             selectData.push(originData[i]["選択肢"]);
@@ -57,7 +65,12 @@ function App() {
             marubatuData.push(originData[i]["解答"]);
           }
         }
+        for (let i = 0; i < newQuizData.length; i++) {
+          for (let j = 0; j < newQuizData[i].selectData.length; j++) {
+            newQuizData[i].selectData[j] = newQuizData[i].selectData[j].replace( ChangeNumberToAlphabets(j) + ".", (j + 1) + ". ");
 
+          }
+        }
         setQuizData(newQuizData);
         setId(0); // Reset quiz to first question
         setMondai(newQuizData[0].keyWord);
@@ -109,6 +122,12 @@ function App() {
             marubatuData.push(originData[i]["解答"]);
           }
         }
+        for (let i = 0; i < newQuizData.length; i++) {
+          for (let j = 0; j < newQuizData[i].selectData.length; j++) {
+            newQuizData[i].selectData[j] = newQuizData[i].selectData[j].replace( ChangeNumberToAlphabets(j) + ".", (j + 1) + ".  ");
+
+          }
+        }
         newQuizData = shuffleArray(newQuizData);
         setQuizData(newQuizData);
         setId(0); // Reset quiz to first question
@@ -141,7 +160,7 @@ function App() {
       setAns(quizData[nextId].marubatuData);
     } else {
       const result = countAndPercentage(correct);
-      alert(`終了！正解数: ${result.trueCount} / ${correct.length} (${result.truePercentage}%)`);
+      alert(`終了！正解数: ${result.trueCount} / ${correct.length} (${Math.round(result.truePercentage)}%)`);
       setId(0);
       setMondai(quizData[0].keyWord);
       setSentaku(quizData[0].selectData);
@@ -188,8 +207,7 @@ function App() {
       <input type="file" accept=".csv" onChange={handleFileChange} />
       <button onClick={startQuiz}>問題を順番に表示</button>
       <button onClick={randomQuiz}>ランダムに問題を表示</button>
-      <h1>問題</h1>
-      <h2>{id + 1}問目</h2>
+      <h1>{id + 1}問目</h1>
       <p>正解数：{countAndPercentage(correct).trueCount} / {correct.length}</p>
       <p>正解率：{Math.round(countAndPercentage(correct).truePercentage)}%</p>
       <h2>問題文</h2>
@@ -202,10 +220,12 @@ function App() {
         </div>
       ))}
       <br />
-      <button onClick={answerShow} style={{margin:30,padding:10}}>答え確認</button>
-      <button onClick={nextQuestion} style={{margin:30,padding:10}}>次の問題</button>
+      <button onClick={answerShow} style={{margin:30,padding:5}}>答え確認</button>
+      <button onClick={nextQuestion} style={{margin:30,padding:5}}>次の問題</button>
+
     </div>
   );
 }
+//      <pre>{JSON.stringify(quizData, null, 2)}</pre>
 
 export default App;
