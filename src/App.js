@@ -10,7 +10,7 @@ function App() {
   const [ans, setAns] = useState([]);
   const [correct, setCorrect] = useState([]);
   const checkboxRefs = useRef([]);
-  const [jump, setJump] = useState(0);
+  const [jump, setJump] = useState(1);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -261,7 +261,12 @@ function App() {
   const jumpQuiz = () => {
     resetCheckboxes();
     let jump_num = parseInt(jump);
-    if (jump_num < quizData.length + 1) {
+    console.log(jump_num);
+    if (0 > jump_num) {
+      alert("問題番号が不正です");
+    } else if (jump_num === 0) {
+      alert("問題番号が不正です");
+    } else if (jump_num < quizData.length + 1) {
       jump_num = jump_num - 1;
       setId(jump_num);
       setMondai(quizData[jump_num].keyWord);
