@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Papa from "papaparse";
 
 function App() {
@@ -8,7 +8,9 @@ function App() {
   const [sentaku, setSentaku] = useState([]);
   const [id, setId] = useState(0);
   const [ans, setAns] = useState([]);
-  const[correct, setCorrect] = useState([]);
+  const [correct, setCorrect] = useState([]);
+  const checkboxRefs = useRef([]);
+  const [jump, setJump] = useState(0);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -25,17 +27,17 @@ function App() {
     setId(0);
     setAns([]);
     setCorrect([]);
-
   };
 
-  function ChangeNumberToAlphabets(number){
+  function ChangeNumberToAlphabets(number) {
     const alphabet = "A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z";
     const alphabets = alphabet.split(",");
 
     return alphabets[number];
-}
+  }
 
   const startQuiz = () => {
+    resetCheckboxes();
     Papa.parse(fileContent, {
       header: true,
       complete: (results) => {
@@ -52,12 +54,22 @@ function App() {
             selectData.push(originData[i]["選択肢"]);
             marubatuData.push(originData[i]["解答"]);
           } else if (i === originData.length - 1) {
-            newQuizData.push({ keyWord: keyWord, selectData: selectData, marubatuData: marubatuData });
+            newQuizData.push({
+              keyWord: keyWord,
+              selectData: selectData,
+              marubatuData: marubatuData,
+            });
+          } else if (originData[i]["選択肢"] === "") {
+            continue;
           } else if (originData[i]["設問"] === "") {
             selectData.push(originData[i]["選択肢"]);
             marubatuData.push(originData[i]["解答"]);
           } else if (originData[i]["設問"] !== "") {
-            newQuizData.push({ keyWord: keyWord, selectData: selectData, marubatuData: marubatuData });
+            newQuizData.push({
+              keyWord: keyWord,
+              selectData: selectData,
+              marubatuData: marubatuData,
+            });
             keyWord = originData[i]["設問"];
             selectData = [];
             marubatuData = [];
@@ -67,8 +79,10 @@ function App() {
         }
         for (let i = 0; i < newQuizData.length; i++) {
           for (let j = 0; j < newQuizData[i].selectData.length; j++) {
-            newQuizData[i].selectData[j] = newQuizData[i].selectData[j].replace( ChangeNumberToAlphabets(j) + ".", (j + 1) + ". ");
-
+            newQuizData[i].selectData[j] = newQuizData[i].selectData[j].replace(
+              ChangeNumberToAlphabets(j) + ".",
+              j + 1 + ". "
+            );
           }
         }
         setQuizData(newQuizData);
@@ -76,7 +90,7 @@ function App() {
         setMondai(newQuizData[0].keyWord);
         setSentaku(newQuizData[0].selectData);
         setAns(newQuizData[0].marubatuData);
-        setCorrect([])
+        setCorrect([]);
         const checkboxes = document.querySelectorAll('input[type="checkbox"]');
         checkboxes.forEach((checkbox) => {
           checkbox.checked = false;
@@ -87,13 +101,14 @@ function App() {
 
   function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
     }
     return array;
-}
+  }
 
   const randomQuiz = () => {
+    resetCheckboxes();
     Papa.parse(fileContent, {
       header: true,
       complete: (results) => {
@@ -109,12 +124,20 @@ function App() {
             selectData.push(originData[i]["選択肢"]);
             marubatuData.push(originData[i]["解答"]);
           } else if (i === originData.length - 1) {
-            newQuizData.push({ keyWord: keyWord, selectData: selectData, marubatuData: marubatuData });
+            newQuizData.push({
+              keyWord: keyWord,
+              selectData: selectData,
+              marubatuData: marubatuData,
+            });
           } else if (originData[i]["設問"] === "") {
             selectData.push(originData[i]["選択肢"]);
             marubatuData.push(originData[i]["解答"]);
           } else if (originData[i]["設問"] !== "") {
-            newQuizData.push({ keyWord: keyWord, selectData: selectData, marubatuData: marubatuData });
+            newQuizData.push({
+              keyWord: keyWord,
+              selectData: selectData,
+              marubatuData: marubatuData,
+            });
             keyWord = originData[i]["設問"];
             selectData = [];
             marubatuData = [];
@@ -124,8 +147,10 @@ function App() {
         }
         for (let i = 0; i < newQuizData.length; i++) {
           for (let j = 0; j < newQuizData[i].selectData.length; j++) {
-            newQuizData[i].selectData[j] = newQuizData[i].selectData[j].replace( ChangeNumberToAlphabets(j) + ".", (j + 1) + ".  ");
-
+            newQuizData[i].selectData[j] = newQuizData[i].selectData[j].replace(
+              ChangeNumberToAlphabets(j) + ".",
+              j + 1 + ".  "
+            );
           }
         }
         newQuizData = shuffleArray(newQuizData);
@@ -142,16 +167,19 @@ function App() {
     });
   };
   function countAndPercentage(array) {
-    const trueCount = array.filter(value => value === true).length;
-    const totalCount = array.length;
+    const trueCount = array.filter((value) => value === true).length;
+    const falseCount = array.filter((value) => value === false).length;
+    const totalCount = trueCount + falseCount;
     const truePercentage = (trueCount / totalCount) * 100;
     return {
-        trueCount: trueCount,
-        truePercentage: truePercentage
+      trueCount: trueCount,
+      truePercentage: truePercentage,
+      totalCount: totalCount,
     };
-}
+  }
 
   const nextQuestion = () => {
+    resetCheckboxes();
     if (id + 1 < quizData.length) {
       const nextId = id + 1;
       setId(nextId);
@@ -160,45 +188,87 @@ function App() {
       setAns(quizData[nextId].marubatuData);
     } else {
       const result = countAndPercentage(correct);
-      alert(`終了！正解数: ${result.trueCount} / ${correct.length} (${Math.round(result.truePercentage)}%)`);
+      alert(
+        `終了！正解数: ${result.trueCount} / ${result.totalCount} (${Math.round(
+          result.truePercentage
+        )}%)`
+      );
       setId(0);
       setMondai(quizData[0].keyWord);
       setSentaku(quizData[0].selectData);
       setAns(quizData[0].marubatuData);
-      setCorrect([])
+      setCorrect([]);
+      resetCheckboxes();
     }
 
     // Uncheck all checkboxes
     const checkboxes = document.querySelectorAll('input[type="checkbox"]');
     checkboxes.forEach((checkbox) => {
       checkbox.checked = false;
+      checkbox.nextSibling.style.color = "black";
     });
   };
 
   const answerShow = () => {
-    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
     const userAnswers = [];
-    checkboxes.forEach((checkbox, index) => {
-      if (checkbox.checked) {
+    checkboxRefs.current.forEach((checkbox, index) => {
+      if (checkbox && checkbox.checked) {
+        // checkbox が null でないことを確認
         userAnswers.push(index);
       }
     });
 
-    const correctAnswers = ans.map((answer, index) => (answer === "〇" ? index : null)).filter((index) => index !== null);
+    const correctAnswers = ans
+      .map((answer, index) => (answer === "〇" ? index : null))
+      .filter((index) => index !== null);
 
-    const isCorrect = userAnswers.length === correctAnswers.length && userAnswers.every((answer) => correctAnswers.includes(answer));
+    const isCorrect =
+      userAnswers.length === correctAnswers.length &&
+      userAnswers.every((answer) => correctAnswers.includes(answer));
+
+    checkboxRefs.current.forEach((checkbox, index) => {
+      if (checkbox) {
+        // checkbox が null でないことを再確認
+        checkbox.nextSibling.style.color = correctAnswers.includes(index)
+          ? "red"
+          : "black";
+      }
+    });
 
     if (isCorrect) {
       alert("正解！");
       let verCorrect = [...correct];
       verCorrect[id] = true;
-      setCorrect([...verCorrect])
+      setCorrect([...verCorrect]);
     } else {
-      const correctAnswerIndexes = correctAnswers.map((index) => index + 1); // +1 to make it 1-based index
+      const correctAnswerIndexes = correctAnswers.map((index) => index + 1);
       alert(`不正解！答えは ${correctAnswerIndexes.join(", ")} 番です`);
       let verCorrect = [...correct];
       verCorrect[id] = false;
-      setCorrect([...verCorrect])
+      setCorrect([...verCorrect]);
+    }
+  };
+
+  const resetCheckboxes = () => {
+    checkboxRefs.current.forEach((checkbox) => {
+      if (checkbox) {
+        checkbox.checked = false;
+        checkbox.nextSibling.style.color = "black";
+      }
+    });
+  };
+
+  const jumpQuiz = () => {
+    resetCheckboxes();
+    let jump_num = parseInt(jump);
+    if (jump_num < quizData.length + 1) {
+      jump_num = jump_num - 1;
+      setId(jump_num);
+      setMondai(quizData[jump_num].keyWord);
+      setSentaku(quizData[jump_num].selectData);
+      setAns(quizData[jump_num].marubatuData);
+    } else {
+      alert("問題番号が不正です");
     }
   };
 
@@ -208,21 +278,46 @@ function App() {
       <button onClick={startQuiz}>問題を順番に表示</button>
       <button onClick={randomQuiz}>ランダムに問題を表示</button>
       <h1>{id + 1}問目</h1>
-      <p>正解数：{countAndPercentage(correct).trueCount} / {correct.length}</p>
+      <p>
+        正解数：{countAndPercentage(correct).trueCount} /{" "}
+        {countAndPercentage(correct).totalCount}
+      </p>
       <p>正解率：{Math.round(countAndPercentage(correct).truePercentage)}%</p>
       <h2>問題文</h2>
       <p>{mondai}</p>
       <h2>選択肢</h2>
       {sentaku.map((option, index) => (
         <div key={index}>
-          <input type="checkbox" id={`option${index}`} name="quiz" value={option} />
+          <input
+            type="checkbox"
+            id={`option${index}`}
+            name="quiz"
+            value={option}
+            ref={(el) => (checkboxRefs.current[index] = el)} // Ref を各チェックボックスに割り当て
+          />
           <label htmlFor={`option${index}`}>{option}</label>
         </div>
       ))}
-      <br />
-      <button onClick={answerShow} style={{margin:30,padding:5}}>答え確認</button>
-      <button onClick={nextQuestion} style={{margin:30,padding:5}}>次の問題</button>
-
+      <div>
+        <button onClick={answerShow} style={{ margin: 30, padding: 5 }}>
+          答え確認
+        </button>
+        <button onClick={nextQuestion} style={{ margin: 30, padding: 5 }}>
+          次の問題
+        </button>
+      </div>
+      <div>
+        <label>問題番号指定：</label>
+        <input
+          type="number"
+          onChange={(e) => setJump(e.target.value)}
+          style={{ padding: 5 }}
+          value={jump}
+        />
+        <button onClick={jumpQuiz} style={{ margin: 30, padding: 5 }}>
+          ジャンプする
+        </button>
+      </div>
     </div>
   );
 }
