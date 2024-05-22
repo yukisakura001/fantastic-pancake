@@ -129,6 +129,8 @@ function App() {
               selectData: selectData,
               marubatuData: marubatuData,
             });
+          } else if (originData[i]["選択肢"] === "") {
+            continue;
           } else if (originData[i]["設問"] === "") {
             selectData.push(originData[i]["選択肢"]);
             marubatuData.push(originData[i]["解答"]);
@@ -318,6 +320,7 @@ function App() {
           onChange={(e) => setJump(e.target.value)}
           style={{ padding: 5 }}
           value={jump}
+          onKeyDown={jumpQuiz}
         />
         <button onClick={jumpQuiz} style={{ margin: 30, padding: 5 }}>
           ジャンプする
