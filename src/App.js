@@ -279,6 +279,12 @@ function App() {
     }
   };
 
+  const jumpQuiz1 = (e) => {
+    if (e.key === "Enter") {
+      jumpQuiz();
+    }
+  };
+
   return (
     <div>
       <input type="file" accept=".csv" onChange={handleFileChange} />
@@ -320,7 +326,7 @@ function App() {
           onChange={(e) => setJump(e.target.value)}
           style={{ padding: 5 }}
           value={jump}
-          onKeyDown={jumpQuiz}
+          onKeyDown={jumpQuiz1}
         />
         <button onClick={jumpQuiz} style={{ margin: 30, padding: 5 }}>
           ジャンプする
