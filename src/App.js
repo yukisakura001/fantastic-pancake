@@ -81,7 +81,8 @@ function App() {
           for (let j = 0; j < newQuizData[i].selectData.length; j++) {
             newQuizData[i].selectData[j] = newQuizData[i].selectData[j].replace(
               ChangeNumberToAlphabets(j) + ".",
-              j + 1 + ". "
+              //j + 1 + ". "
+              ""
             );
           }
         }
@@ -151,11 +152,19 @@ function App() {
           for (let j = 0; j < newQuizData[i].selectData.length; j++) {
             newQuizData[i].selectData[j] = newQuizData[i].selectData[j].replace(
               ChangeNumberToAlphabets(j) + ".",
-              j + 1 + ".  "
+              //j + 1 + ".  "
+              ""
             );
           }
         }
         newQuizData = shuffleArray(newQuizData);
+        for (let i = 0; i < newQuizData.length; i++) {
+          [newQuizData[i].selectData, newQuizData[i].marubatuData] =
+            shuffleAndSwapArrays(
+              newQuizData[i].selectData,
+              newQuizData[i].marubatuData
+            );
+        }
         setQuizData(newQuizData);
         setId(0); // Reset quiz to first question
         setMondai(newQuizData[0].keyWord);
@@ -285,6 +294,27 @@ function App() {
     }
   };
 
+  function shuffleAndSwapArrays(array1, array2) {
+    if (array1.length !== array2.length) {
+      throw new Error("Both arrays must have the same length.");
+    }
+
+    const length = array1.length;
+    const indices = Array.from({ length }, (_, i) => i);
+
+    // Shuffle the indices array
+    for (let i = length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+
+    // Create new arrays based on the shuffled indices
+    const newArray1 = indices.map((index) => array1[index]);
+    const newArray2 = indices.map((index) => array2[index]);
+
+    return [newArray1, newArray2];
+  }
+
   return (
     <div>
       <input type="file" accept=".csv" onChange={handleFileChange} />
@@ -332,6 +362,23 @@ function App() {
           ジャンプする
         </button>
       </div>
+      <h2 style={{ marginTop: 30 }}>結果</h2>
+      <table border="2" width="100%" style={{ borderCollapse: "collapse" }}>
+        <thead>
+          <tr>
+            <th width="30%">問題番号</th>
+            <th>結果</th>
+          </tr>
+        </thead>
+        <tbody>
+          {quizData.map((quiz, index) => (
+            <tr key={index}>
+              <td align="center">{index + 1}問目</td>
+              <td align="center">{correct[index] ? "正解" : "不正解"}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
