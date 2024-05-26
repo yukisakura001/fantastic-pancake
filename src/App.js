@@ -375,11 +375,13 @@ function App() {
             <tr key={index}>
               <td align="center">{index + 1}問目</td>
               <td align="center">
-                {correct[index] === true
-                  ? "正解"
-                  : correct[index] === false
-                  ? "不正解"
-                  : "未回答"}
+                {correct[index] === true ? (
+                  <font color="red">正解</font>
+                ) : correct[index] === false ? (
+                  <font color="blue">不正解</font>
+                ) : (
+                  <font color="green">未回答</font>
+                )}
               </td>
             </tr>
           ))}
