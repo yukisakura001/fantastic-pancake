@@ -272,7 +272,6 @@ function App() {
   const jumpQuiz = () => {
     resetCheckboxes();
     let jump_num = parseInt(jump);
-    console.log(jump_num);
     if (0 > jump_num) {
       alert("問題番号が不正です");
     } else if (jump_num === 0) {
@@ -283,6 +282,27 @@ function App() {
       setMondai(quizData[jump_num].keyWord);
       setSentaku(quizData[jump_num].selectData);
       setAns(quizData[jump_num].marubatuData);
+    } else {
+      alert("問題番号が不正です");
+    }
+  };
+
+  const jumpQuiz2 = (num) => {
+    resetCheckboxes();
+    if (0 > num) {
+      alert("問題番号が不正です");
+    } else if (num === 0) {
+      alert("問題番号が不正です");
+    } else if (num < quizData.length + 1) {
+      num = num - 1;
+      setId(num);
+      setMondai(quizData[num].keyWord);
+      setSentaku(quizData[num].selectData);
+      setAns(quizData[num].marubatuData);
+      window.scroll({
+        top: 0,
+        behavior: "smooth",
+      });
     } else {
       alert("問題番号が不正です");
     }
@@ -314,6 +334,11 @@ function App() {
 
     return [newArray1, newArray2];
   }
+  const handleClick = (event, num) => {
+    event.preventDefault(); // ページ遷移を防ぐ
+    setJump(num);
+    jumpQuiz2(num);
+  };
 
   return (
     <div>
@@ -373,7 +398,16 @@ function App() {
         <tbody>
           {quizData.map((quiz, index) => (
             <tr key={index}>
-              <td align="center">{index + 1}問目</td>
+              <td align="center">
+                <a
+                  href="#"
+                  onClick={(event) => {
+                    handleClick(event, index + 1);
+                  }}
+                >
+                  {index + 1}問目
+                </a>
+              </td>
               <td align="center">
                 {correct[index] === true ? (
                   <font color="red">正解</font>
