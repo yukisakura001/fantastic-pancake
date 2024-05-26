@@ -374,7 +374,13 @@ function App() {
           {quizData.map((quiz, index) => (
             <tr key={index}>
               <td align="center">{index + 1}問目</td>
-              <td align="center">{correct[index] ? "正解" : "不正解"}</td>
+              <td align="center">
+                {correct[index] === true
+                  ? "正解"
+                  : correct[index] === false
+                  ? "不正解"
+                  : "未回答"}
+              </td>
             </tr>
           ))}
         </tbody>
