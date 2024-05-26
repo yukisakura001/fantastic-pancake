@@ -202,7 +202,7 @@ function App() {
       let hantei = window.confirm(
         `終了！正解数: ${result.trueCount} / ${result.totalCount} (${Math.round(
           result.truePercentage
-        )}%\nもう一度最初から始めますか？`
+        )}%)\nもう一度最初から始めますか？`
       );
       if (hantei === true) {
         resetCheckboxes();
