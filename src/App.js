@@ -190,8 +190,8 @@ function App() {
   }
 
   const nextQuestion = () => {
-    resetCheckboxes();
     if (id + 1 < quizData.length) {
+      resetCheckboxes();
       const nextId = id + 1;
       setId(nextId);
       setMondai(quizData[nextId].keyWord);
@@ -199,25 +199,27 @@ function App() {
       setAns(quizData[nextId].marubatuData);
     } else {
       const result = countAndPercentage(correct);
-      alert(
+      let hantei = window.confirm(
         `終了！正解数: ${result.trueCount} / ${result.totalCount} (${Math.round(
           result.truePercentage
-        )}%)`
+        )}%\nもう一度最初から始めますか？`
       );
-      setId(0);
-      setMondai(quizData[0].keyWord);
-      setSentaku(quizData[0].selectData);
-      setAns(quizData[0].marubatuData);
-      setCorrect([]);
-      resetCheckboxes();
+      if (hantei === true) {
+        resetCheckboxes();
+        setId(0);
+        setMondai(quizData[0].keyWord);
+        setSentaku(quizData[0].selectData);
+        setAns(quizData[0].marubatuData);
+        setCorrect([]);
+      }
     }
 
     // Uncheck all checkboxes
-    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-    checkboxes.forEach((checkbox) => {
-      checkbox.checked = false;
-      checkbox.nextSibling.style.color = "black";
-    });
+    //const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    //checkboxes.forEach((checkbox) => {
+    //  checkbox.checked = false;
+    //  checkbox.nextSibling.style.color = "black";
+    //});
   };
 
   const answerShow = () => {
