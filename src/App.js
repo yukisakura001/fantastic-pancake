@@ -170,6 +170,7 @@ function App() {
         setMondai(newQuizData[0].keyWord);
         setSentaku(newQuizData[0].selectData);
         setAns(newQuizData[0].marubatuData);
+        setCorrect([]);
         const checkboxes = document.querySelectorAll('input[type="checkbox"]');
         checkboxes.forEach((checkbox) => {
           checkbox.checked = false;
