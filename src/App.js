@@ -5,12 +5,14 @@ function App() {
   const [quizData, setQuizData] = useState([]);
   const [fileContent, setFileContent] = useState("");
   const [mondai, setMondai] = useState("");
+  const [sanko1, setSanko] = useState("");
   const [sentaku, setSentaku] = useState([]);
   const [id, setId] = useState(0);
   const [ans, setAns] = useState([]);
   const [correct, setCorrect] = useState([]);
   const checkboxRefs = useRef([]);
   const [jump, setJump] = useState(1);
+  const [sanko_check, setSankoCheck] = useState(false);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -23,6 +25,7 @@ function App() {
     }
     setQuizData([]);
     setMondai("");
+    setSanko("");
     setSentaku([]);
     setId(0);
     setAns([]);
@@ -43,6 +46,7 @@ function App() {
       complete: (results) => {
         const originData = results.data;
         let keyWord = originData[0]["設問"];
+        let sanko = originData[0]["参考"];
         let newQuizData = [];
         let selectData = [];
         let marubatuData = [];
@@ -51,11 +55,13 @@ function App() {
           // A. to  1. convert
           if (i === 0) {
             keyWord = originData[i]["設問"];
+            sanko = originData[i]["参考"];
             selectData.push(originData[i]["選択肢"]);
             marubatuData.push(originData[i]["解答"]);
           } else if (i === originData.length - 1) {
             newQuizData.push({
               keyWord: keyWord,
+              sanko: sanko,
               selectData: selectData,
               marubatuData: marubatuData,
             });
@@ -67,10 +73,12 @@ function App() {
           } else if (originData[i]["設問"] !== "") {
             newQuizData.push({
               keyWord: keyWord,
+              sanko: sanko,
               selectData: selectData,
               marubatuData: marubatuData,
             });
             keyWord = originData[i]["設問"];
+            sanko = originData[i]["参考"];
             selectData = [];
             marubatuData = [];
             selectData.push(originData[i]["選択肢"]);
@@ -89,6 +97,7 @@ function App() {
         setQuizData(newQuizData);
         setId(0); // Reset quiz to first question
         setMondai(newQuizData[0].keyWord);
+        setSanko(newQuizData[0].sanko);
         setSentaku(newQuizData[0].selectData);
         setAns(newQuizData[0].marubatuData);
         setCorrect([]);
@@ -115,6 +124,7 @@ function App() {
       complete: (results) => {
         const originData = results.data;
         let keyWord = originData[0]["設問"];
+        let sanko = originData[0]["参考"];
         let newQuizData = [];
         let selectData = [];
         let marubatuData = [];
@@ -122,11 +132,13 @@ function App() {
         for (let i = 0; i < originData.length; i++) {
           if (i === 0) {
             keyWord = originData[i]["設問"];
+            sanko = originData[i]["参考"];
             selectData.push(originData[i]["選択肢"]);
             marubatuData.push(originData[i]["解答"]);
           } else if (i === originData.length - 1) {
             newQuizData.push({
               keyWord: keyWord,
+              sanko: sanko,
               selectData: selectData,
               marubatuData: marubatuData,
             });
@@ -138,10 +150,12 @@ function App() {
           } else if (originData[i]["設問"] !== "") {
             newQuizData.push({
               keyWord: keyWord,
+              sanko: sanko,
               selectData: selectData,
               marubatuData: marubatuData,
             });
             keyWord = originData[i]["設問"];
+            sanko = originData[i]["参考"];
             selectData = [];
             marubatuData = [];
             selectData.push(originData[i]["選択肢"]);
@@ -168,6 +182,7 @@ function App() {
         setQuizData(newQuizData);
         setId(0); // Reset quiz to first question
         setMondai(newQuizData[0].keyWord);
+        setSanko(newQuizData[0].sanko);
         setSentaku(newQuizData[0].selectData);
         setAns(newQuizData[0].marubatuData);
         setCorrect([]);
@@ -196,6 +211,7 @@ function App() {
       const nextId = id + 1;
       setId(nextId);
       setMondai(quizData[nextId].keyWord);
+      setSanko(quizData[nextId].sanko);
       setSentaku(quizData[nextId].selectData);
       setAns(quizData[nextId].marubatuData);
     } else {
@@ -209,21 +225,16 @@ function App() {
         resetCheckboxes();
         setId(0);
         setMondai(quizData[0].keyWord);
+        setSanko(quizData[0].sanko);
         setSentaku(quizData[0].selectData);
         setAns(quizData[0].marubatuData);
         setCorrect([]);
       }
     }
-
-    // Uncheck all checkboxes
-    //const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-    //checkboxes.forEach((checkbox) => {
-    //  checkbox.checked = false;
-    //  checkbox.nextSibling.style.color = "black";
-    //});
   };
 
   const answerShow = () => {
+    setSankoCheck(true);
     const userAnswers = [];
     checkboxRefs.current.forEach((checkbox, index) => {
       if (checkbox && checkbox.checked) {
@@ -270,6 +281,7 @@ function App() {
         checkbox.nextSibling.style.color = "black";
       }
     });
+    setSankoCheck(false);
   };
 
   const jumpQuiz = () => {
@@ -283,6 +295,7 @@ function App() {
       jump_num = jump_num - 1;
       setId(jump_num);
       setMondai(quizData[jump_num].keyWord);
+      setSanko(quizData[jump_num].sanko);
       setSentaku(quizData[jump_num].selectData);
       setAns(quizData[jump_num].marubatuData);
     } else {
@@ -300,6 +313,7 @@ function App() {
       num = num - 1;
       setId(num);
       setMondai(quizData[num].keyWord);
+      setSanko(quizData[num].sanko);
       setSentaku(quizData[num].selectData);
       setAns(quizData[num].marubatuData);
       window.scroll({
@@ -376,6 +390,9 @@ function App() {
         <button onClick={nextQuestion} style={{ margin: 30, padding: 5 }}>
           次の問題
         </button>
+      </div>
+      <div>
+        <p>{sanko_check ? sanko1 : ""}</p>
       </div>
       <div>
         <label>問題番号指定：</label>
