@@ -392,7 +392,8 @@ function App() {
         </button>
       </div>
       <div>
-        <p>{sanko_check ? sanko1 : ""}</p>
+        <h2>参考</h2>
+        {sanko_check ? sanko1 : ""}
       </div>
       <div>
         <label>問題番号指定：</label>
