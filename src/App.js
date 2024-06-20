@@ -393,7 +393,7 @@ function App() {
       </div>
       <div>
         <h2>参考</h2>
-        {sanko_check ? sanko1 : ""}
+        <pre>{sanko_check ? sanko1 : ""}</pre>
       </div>
       <div>
         <label>問題番号指定：</label>
