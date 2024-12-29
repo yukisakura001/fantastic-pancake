@@ -555,7 +555,18 @@ export default function ToolAPage() {
           type="file"
           accept=".csv"
           onChange={handleFileChange}
-          className="cursor-pointer p-2 border border-gray-300 rounded hover:bg-gray-100 transition-colors"
+          className="
+    cursor-pointer
+    p-2
+    border border-gray-300
+    rounded
+    hover:bg-gray-100
+    transition-colors
+    w-full       /* デフォルト（モバイルなど小さい画面）では幅いっぱい */
+    sm:w-1/2     /* 画面幅が sm 以上のときは幅を 50% にする */
+    md:w-1/3     /* 画面幅が md 以上のときは幅を 33% にする */
+    lg:w-1/4     /* 画面幅が lg 以上のときは幅を 25% にする */
+  "
         />
 
         <div className="flex flex-col sm:flex-row gap-2">
