@@ -524,7 +524,7 @@ export default function ToolAPage() {
           </div>
 
           <div className="mt-6">
-            <a href="/template.csv" download>
+            <a href="Template.csv" download>
               <button className="w-full px-4 py-2 bg-amber-600 text-white font-semibold rounded-md shadow hover:bg-amber-800 transition-colors">
                 問題ファイルテンプレをダウンロード
               </button>
