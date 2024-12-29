@@ -237,7 +237,7 @@ export default function Page() {
 
   // 合計金額、デフォルト傾斜度など
   const [totalAmount, setTotalAmount] = useState(97560);
-  const [defaultTilt, setDefaultTilt] = useState(30);
+  const [defaultTilt, setDefaultTilt] = useState(50);
   // maxTilt は固定で 100
   // const [maxTilt, setMaxTilt] = useState(100); // 不要
 
