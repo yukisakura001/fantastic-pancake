@@ -14,6 +14,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja" className="h-full">
+      <link rel="manifest" href="/manifest.json" />
+      <meta name="theme-color" content="#fde68a" />
       <body className="h-full flex flex-col">
         <Header />
         {/* ヘッダー以降の領域をすべて背景黄色にする */}
