@@ -7,8 +7,6 @@ import CircleIconButton from "../components/CircleIconButton";
 
 /**
  * カスタムの NumericInput コンポーネント
- * - 文字列入力を都度保持し、blur したタイミングで数値変換
- * - parse に失敗したらアラート表示＆元値にロールバック
  */
 function NumericInput({
   value,
@@ -28,12 +26,10 @@ function NumericInput({
 }) {
   const [innerValue, setInnerValue] = useState(String(value));
 
-  // 親から value が更新された場合に追従
   useEffect(() => {
     setInnerValue(String(value));
   }, [value]);
 
-  // 初回レンダリング時にのみ実行
   useEffect(() => {
     document.title = "傾斜計算";
   }, []);
@@ -41,18 +37,15 @@ function NumericInput({
   const handleBlur = () => {
     let parsed = parseInt(innerValue, 10);
 
-    // parse 失敗時はアラート＋元値に戻す
     if (isNaN(parsed)) {
       alert("不正な入力です");
       setInnerValue(String(value));
       return;
     }
 
-    // min/max がある場合のクリップ
     if (typeof min === "number" && parsed < min) parsed = min;
     if (typeof max === "number" && parsed > max) parsed = max;
 
-    // 確定
     setInnerValue(String(parsed));
     onChange(parsed);
   };
@@ -100,7 +93,6 @@ function calc_inclined_payment(
   // -----------------------------
   for (let offset = 0; offset <= max_tilt; offset++) {
     const candidates: number[] = [];
-
     const lower = default_tilt - offset;
     const higher = default_tilt + offset;
 
@@ -116,17 +108,13 @@ function calc_inclined_payment(
     // -----------------------------
     for (const candidate_tilt of candidates) {
       const alpha = candidate_tilt / 100.0;
-
-      // 役職ごとのウェイト計算
       const weights: number[] = [];
       for (let i = 0; i < n_roles; i++) {
-        // i=0(上位) → i=n_roles-1(下位)
-        // "上位ほどウェイト大" になるように
+        // 上位ほどウェイトが大きくなるように
         const w = 1 + alpha * (n_roles - 1 - i);
         weights.push(w);
       }
 
-      // ウェイトの総和
       let total_weight = 0;
       for (let i = 0; i < n_roles; i++) {
         total_weight += weights[i] * num_people[i];
@@ -140,21 +128,18 @@ function calc_inclined_payment(
         payments_per_role.push(rounded_per_person);
       }
 
-      // この時点での合計金額 (調整前)
       let sum_payments = 0;
       for (let i = 0; i < n_roles; i++) {
         sum_payments += payments_per_role[i] * num_people[i];
       }
 
-      // usage_flag=true かつ sum_payments < total_amount の場合はスキップ
+      // usage_flag=true かつ合計が不足している場合はスキップ
       if (usage_flag && sum_payments < total_amount) {
         continue;
       }
 
-      // 誤差 (端数)
       const diff = Math.abs(total_amount - sum_payments);
 
-      // 誤差がより小さい場合のみ更新
       if (diff < best_diff) {
         best_diff = diff;
         best_tilt = candidate_tilt;
@@ -164,10 +149,6 @@ function calc_inclined_payment(
     }
   }
 
-  // -----------------------------
-  // 3) 最小誤差パターンで最終調整
-  //    (usage_flag=false の時のみ、不足分を計算者が負担)
-  // -----------------------------
   if (best_sum_payments === null) {
     return {
       best_tilt: null,
@@ -188,23 +169,20 @@ function calc_inclined_payment(
     const base_user_cost = best_payments[user_idx];
 
     if (initial_diff === 0) {
-      // ピッタリ
       user_payment = base_user_cost;
       final_sum = best_sum_payments;
     } else if (initial_diff > 0) {
-      // 合計が多い → 計算者を安くして吸収
+      // 多すぎ → 計算者を安くして吸収
       const adjusted_user_cost = base_user_cost - initial_diff;
       user_payment = adjusted_user_cost;
       final_sum = total_amount;
     } else {
-      // initial_diff < 0 → 合計が不足
-      // usage_flag=true なら既にスキップ済みなはず
-      const adjusted_user_cost = base_user_cost - initial_diff; // diff は負なので加算
+      // 足りない → usage_flag=true ならスキップ済みのはず
+      const adjusted_user_cost = base_user_cost - initial_diff; // (initial_diffは負)
       user_payment = adjusted_user_cost;
       final_sum = total_amount;
     }
   } else {
-    // 計算者なしの場合は合計値そのまま
     user_payment = null;
     final_sum = best_sum_payments;
   }
@@ -220,7 +198,6 @@ function calc_inclined_payment(
 }
 
 export default function Page() {
-  // デフォルトで「奴隷」を抜いたリスト
   const initialRolePeopleList = [
     { role: "部長", num: 7 },
     { role: "課長", num: 5 },
@@ -228,27 +205,20 @@ export default function Page() {
     { role: "部下", num: 5 },
   ];
 
-  // 役職・人数のリスト
   const [rolePeopleList, setRolePeopleList] = useState<
     { role: string; num: number }[]
   >(initialRolePeopleList);
 
   const [ModalOpen, setModalOpen] = useState(false);
 
-  // 合計金額、デフォルト傾斜度など
   const [totalAmount, setTotalAmount] = useState(97560);
   const [defaultTilt, setDefaultTilt] = useState(50);
-  // maxTilt は固定で 100
-  // const [maxTilt, setMaxTilt] = useState(100); // 不要
-
   const [usageFlag, setUsageFlag] = useState(false);
 
-  // 計算者の役職は「一番下の役職」を標準にする
   const [userRole, setUserRole] = useState(
     initialRolePeopleList[initialRolePeopleList.length - 1].role
   );
 
-  // 計算結果表示用
   const [result, setResult] = useState<{
     best_tilt: number | null;
     payments_per_role: number[] | null;
@@ -258,58 +228,48 @@ export default function Page() {
     initial_diff: number | null;
   } | null>(null);
 
-  // 計算者の役職候補は、rolePeopleList から取得してプルダウン表示
   const userRoleOptions = rolePeopleList.map((item) => item.role);
 
-  /**
-   * 指定した行の直下に新しい行を追加する
-   */
   const handleAddRowBelow = (index: number) => {
     setRolePeopleList((prev) => {
       const newRow = { role: "", num: 1 };
       const newList = [...prev];
-      // index+1 の位置に挿入
       newList.splice(index + 1, 0, newRow);
       return newList;
     });
   };
 
-  // 役職・人数行を削除
   const handleRemoveRow = (index: number) => {
     setRolePeopleList((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // 役職・人数の変更
   const handleChangeRole = (index: number, newRole: string) => {
     setRolePeopleList((prev) =>
       prev.map((item, i) => (i === index ? { ...item, role: newRole } : item))
     );
   };
+
   const handleChangeNum = (index: number, newNum: number) => {
     setRolePeopleList((prev) =>
       prev.map((item, i) => (i === index ? { ...item, num: newNum } : item))
     );
   };
 
-  // 計算実行
   const handleCalculate = () => {
     try {
-      // 役職と人数をそれぞれ配列に分解
       const roles = rolePeopleList.map((item) => item.role);
       const num_people = rolePeopleList.map((item) => item.num);
 
-      // 簡易バリデーション (役職が空欄ならエラー)
       if (roles.some((r) => !r.trim())) {
         throw new Error("役職が空欄の行があります。");
       }
 
-      // 傾斜計算 (maxTilt を 100 に固定)
       const calcResult = calc_inclined_payment(
         roles,
         num_people,
         totalAmount,
         defaultTilt,
-        100, // ← 固定
+        100, // maxTilt=100
         userRole,
         usageFlag
       );
@@ -481,12 +441,11 @@ export default function Page() {
         </div>
       </section>
 
-      {/* 計算結果 (モダンなカードデザイン) */}
+      {/* 計算結果 */}
       <section>
         <h2 className="text-xl font-semibold mb-4">計算結果</h2>
         {result ? (
           <div className="bg-white rounded shadow p-6 space-y-4">
-            {/* グリッドで結果を表示 */}
             <div className="grid grid-cols-2 gap-x-4 gap-y-2">
               <div className="text-gray-600 text-sm">最適傾斜度</div>
               <div className="text-gray-900 font-semibold">
@@ -510,7 +469,9 @@ export default function Page() {
                 {result.user_role || "なし"}
               </div>
 
-              <div className="text-gray-600 text-sm">計算者の支払額</div>
+              <div className="text-gray-600 text-sm">
+                <p className="text-amber-600">計算者の支払額</p>
+              </div>
               <div className="text-gray-900 font-semibold">
                 {result.user_payment !== null
                   ? `${result.user_payment} 円`
@@ -530,7 +491,7 @@ export default function Page() {
                       key={i}
                       className="flex justify-between items-center text-sm"
                     >
-                      <span className="text-gray-700">{item.role}</span>
+                      <span className="text-amber-600">{item.role}</span>
                       <span className="font-semibold">
                         {result.payments_per_role?.[i]} 円
                       </span>
@@ -539,6 +500,70 @@ export default function Page() {
                 </div>
               </div>
             )}
+
+            {/* --- ここから追加部分: 計算者分を除いた単価・合計額表示 --- */}
+            {result.payments_per_role && (
+              <div className="border-t border-gray-200 pt-4">
+                <h4 className="font-semibold mb-2 text-gray-700">回収額</h4>
+
+                {/* 計算者分を除いた役職の合計費用を算出 */}
+                {(() => {
+                  // 計算者のいる index
+                  const userIdx = rolePeopleList.findIndex(
+                    (item) => item.role === result.user_role
+                  );
+
+                  // 計算者分を除いた役職の合計値を逐次加算
+                  let totalExcludingUser = 0;
+
+                  const rows = rolePeopleList.map((item, i) => {
+                    const costPerPerson = result.payments_per_role![i] || 0;
+                    let count = item.num;
+
+                    // もしこの役職が計算者の役職なら、1人分を除く
+                    if (i === userIdx) {
+                      count = Math.max(0, count - 1);
+                    }
+
+                    // 合計費用
+                    const roleTotal = costPerPerson * count;
+                    // 集計
+                    totalExcludingUser += roleTotal;
+
+                    // 計算者以外の人数が 0 の場合は表示しない
+                    if (count === 0) {
+                      return null;
+                    }
+
+                    return (
+                      <div
+                        key={i}
+                        className="flex justify-between items-center text-sm"
+                      >
+                        <span className="text-gray-700">
+                          {item.role} (計算者除く {count} 名)
+                        </span>
+                        <span className="font-semibold">
+                          単価: {costPerPerson} 円 &nbsp;/&nbsp; 合計:{" "}
+                          {roleTotal} 円
+                        </span>
+                      </div>
+                    );
+                  });
+
+                  return (
+                    <>
+                      <div className="space-y-2">{rows}</div>
+                      <hr className="my-2" />
+                      <div className="text-right font-semibold">
+                        計算者以外の費用合計: {totalExcludingUser} 円
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+            )}
+            {/* --- ここまで追加部分 --- */}
           </div>
         ) : (
           <p>まだ計算していません。</p>
