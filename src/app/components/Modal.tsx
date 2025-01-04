@@ -9,14 +9,23 @@ interface ModalProps {
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
   useEffect(() => {
     if (isOpen) {
+      // スクロールバーの幅を取得
+      const scrollBarWidth =
+        window.innerWidth - document.documentElement.clientWidth;
+
+      // bodyにスクロールバー幅を反映
+      document.body.style.paddingRight = `${scrollBarWidth}px`;
       document.body.style.overflow = "hidden";
     } else {
-      // モーダルが閉じられたら、スクロールを再有効化
+      // モーダルが閉じられたらリセット
       document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
     }
-    // クリーンアップ関数で、コンポーネントがアンマウントされたときにスクロールを再有効化
+
+    // クリーンアップ関数で、コンポーネントがアンマウントされたときにもリセット
     return () => {
       document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
     };
   }, [isOpen]);
 
@@ -25,10 +34,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center rounded-lg shadow-md">
       {/* 背景の半透明オーバーレイ */}
-      <div
-        className="fixed inset-0 bg-black bg-opacity-50"
-        onClick={onClose}
-      ></div>
+      <div className="fixed inset-0 bg-black bg-opacity-50" onClick={onClose} />
       {/* モーダルのコンテンツ */}
       <div className="relative bg-white rounded-lg p-8 z-10 max-h-screen overflow-y-auto w-11/12 md:w-3/4 lg:w-1/2 shadow-lg">
         {/* バツボタン */}
