@@ -10,7 +10,7 @@ import React, {
 import Papa from "papaparse";
 import CircleIconButton from "../components/CircleIconButton";
 import Modal from "../components/Modal";
-
+import { motion } from "motion/react";
 /**
  * CSVファイルの各行の型（空文字も入り得るので一応 ? を付ける）
  */
@@ -470,7 +470,20 @@ export default function ToolAPage() {
 
   // ------------------------ JSX ------------------------ //
   return (
-    <div className="container mx-auto p-4">
+    <motion.div
+      initial={{ opacity: 0, y: 100 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.8,
+        ease: "easeInOut",
+        // もしくは type: "spring" を使うなど
+      }}
+      onAnimationStart={() => document.body.classList.add("overflow-hidden")}
+      onAnimationComplete={() =>
+        document.body.classList.remove("overflow-hidden")
+      }
+      className="container mx-auto p-4"
+    >
       {/* CSVファイルの読み込み + エンコーディング選択 + ダウンロードボタン */}
       <CircleIconButton onClick={() => setModalOpen(true)} />
       <Modal isOpen={ModalOpen} onClose={() => setModalOpen(false)}>
@@ -704,6 +717,6 @@ export default function ToolAPage() {
           ))}
         </tbody>
       </table>
-    </div>
+    </motion.div>
   );
 }

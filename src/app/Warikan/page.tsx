@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from "react";
 import Modal from "../components/Modal";
 import CircleIconButton from "../components/CircleIconButton";
-
+import { motion } from "motion/react";
 /**
  * カスタムの NumericInput コンポーネント
  */
@@ -280,7 +280,20 @@ export default function Page() {
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto space-y-8">
+    <motion.div
+      initial={{ opacity: 0, y: 100 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.8,
+        ease: "easeInOut",
+        // もしくは type: "spring" を使うなど
+      }}
+      className="p-6 max-w-3xl mx-auto space-y-8"
+      onAnimationStart={() => document.body.classList.add("overflow-hidden")}
+      onAnimationComplete={() =>
+        document.body.classList.remove("overflow-hidden")
+      }
+    >
       {/* 入力フォーム */}
       <section className="p-4">
         <CircleIconButton onClick={() => setModalOpen(true)} />
@@ -446,40 +459,44 @@ export default function Page() {
         <h2 className="text-xl font-semibold mb-4">計算結果</h2>
         {result ? (
           <div className="bg-white rounded shadow p-6 space-y-4">
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-              <div className="text-gray-600 text-sm">最適傾斜度</div>
-              <div className="text-gray-900 font-semibold">
+            {/* ---- ①ラベル・値をdl/dt/ddにして右寄せ ---- */}
+            <dl className="grid grid-cols-2 gap-x-4 gap-y-2">
+              {/* 最適傾斜度 */}
+              <dt className="text-gray-600 text-sm">最適傾斜度</dt>
+              <dd className="text-gray-900 font-semibold text-right">
                 {result.best_tilt !== null ? `${result.best_tilt}%` : "なし"}
-              </div>
+              </dd>
 
-              <div className="text-gray-600 text-sm">過不足額（調整前）</div>
-              <div className="text-gray-900 font-semibold">
+              {/* 過不足額（調整前） */}
+              <dt className="text-gray-600 text-sm">過不足額（調整前）</dt>
+              <dd className="text-gray-900 font-semibold text-right">
                 {result.initial_diff !== null
                   ? `${result.initial_diff} 円`
                   : "-"}
-              </div>
+              </dd>
 
-              <div className="text-gray-600 text-sm">合計支払額</div>
-              <div className="text-gray-900 font-semibold">
+              {/* 合計支払額 */}
+              <dt className="text-gray-600 text-sm">合計支払額</dt>
+              <dd className="text-gray-900 font-semibold text-right">
                 {result.final_sum !== null ? `${result.final_sum} 円` : "-"}
-              </div>
+              </dd>
 
-              <div className="text-gray-600 text-sm">計算者の役職</div>
-              <div className="text-gray-900 font-semibold">
+              {/* 計算者の役職 */}
+              <dt className="text-gray-600 text-sm">計算者の役職</dt>
+              <dd className="text-gray-900 font-semibold text-right">
                 {result.user_role || "なし"}
-              </div>
+              </dd>
 
-              <div className="text-gray-600 text-sm">
-                <p className="text-amber-600">計算者の支払額</p>
-              </div>
-              <div className="text-gray-900 font-semibold">
+              {/* 計算者の支払額 */}
+              <dt className="text-amber-600 text-sm">計算者の支払額</dt>
+              <dd className="text-gray-900 font-semibold text-right">
                 {result.user_payment !== null
                   ? `${result.user_payment} 円`
                   : "－"}
-              </div>
-            </div>
+              </dd>
+            </dl>
 
-            {/* 役職ごとのベース単価 */}
+            {/* ---- ②役職ごとの支払い額 ---- */}
             {result.payments_per_role && (
               <div className="border-t border-gray-200 pt-4">
                 <h4 className="font-semibold mb-2 text-gray-700">
@@ -492,7 +509,7 @@ export default function Page() {
                       className="flex justify-between items-center text-sm"
                     >
                       <span className="text-amber-600">{item.role}</span>
-                      <span className="font-semibold">
+                      <span className="font-semibold text-right">
                         {result.payments_per_role?.[i]} 円
                       </span>
                     </div>
@@ -501,36 +518,33 @@ export default function Page() {
               </div>
             )}
 
-            {/* --- ここから追加部分: 計算者分を除いた単価・合計額表示 --- */}
+            {/* ---- ③回収額 (計算者分を除外した一覧) ---- */}
             {result.payments_per_role && (
               <div className="border-t border-gray-200 pt-4">
                 <h4 className="font-semibold mb-2 text-gray-700">回収額</h4>
-
-                {/* 計算者分を除いた役職の合計費用を算出 */}
                 {(() => {
                   // 計算者のいる index
                   const userIdx = rolePeopleList.findIndex(
                     (item) => item.role === result.user_role
                   );
 
-                  // 計算者分を除いた役職の合計値を逐次加算
+                  // 計算者以外の合計金額を積算
                   let totalExcludingUser = 0;
 
+                  // 各役職の回収額（計算者を除いた人数分）
                   const rows = rolePeopleList.map((item, i) => {
                     const costPerPerson = result.payments_per_role![i] || 0;
                     let count = item.num;
 
-                    // もしこの役職が計算者の役職なら、1人分を除く
+                    // 計算者の役職なら1人分を差し引く
                     if (i === userIdx) {
                       count = Math.max(0, count - 1);
                     }
-
-                    // 合計費用
+                    // 計算者を除いた役職の合計費用
                     const roleTotal = costPerPerson * count;
-                    // 集計
                     totalExcludingUser += roleTotal;
 
-                    // 計算者以外の人数が 0 の場合は表示しない
+                    // 計算者以外の人数が0なら表示しない
                     if (count === 0) {
                       return null;
                     }
@@ -538,12 +552,17 @@ export default function Page() {
                     return (
                       <div
                         key={i}
-                        className="flex justify-between items-center text-sm"
+                        /*
+                    スマホ: 縦に並び中央寄せ
+                    md以上: 横並び + 右寄せ
+                  */
+                        className="flex flex-col md:flex-row md:justify-between
+                             items-center text-sm border-b py-2"
                       >
-                        <span className="text-gray-700">
+                        <span className="text-gray-700 text-center md:text-left">
                           {item.role} (計算者除く {count} 名)
                         </span>
-                        <span className="font-semibold">
+                        <span className="font-semibold text-center md:text-right mt-2 md:mt-0">
                           単価: {costPerPerson} 円 &nbsp;/&nbsp; 合計:{" "}
                           {roleTotal} 円
                         </span>
@@ -554,7 +573,6 @@ export default function Page() {
                   return (
                     <>
                       <div className="space-y-2">{rows}</div>
-                      <hr className="my-2" />
                       <div className="text-right font-semibold">
                         計算者以外の費用合計: {totalExcludingUser} 円
                       </div>
@@ -563,12 +581,11 @@ export default function Page() {
                 })()}
               </div>
             )}
-            {/* --- ここまで追加部分 --- */}
           </div>
         ) : (
           <p>まだ計算していません。</p>
         )}
       </section>
-    </div>
+    </motion.div>
   );
 }
