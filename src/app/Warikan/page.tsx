@@ -281,12 +281,11 @@ export default function Page() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 100 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, x: "100%" }} // 右から開始
+      animate={{ opacity: 1, x: 0 }} // 左へ移動して表示
       transition={{
         duration: 0.8,
         ease: "easeInOut",
-        // もしくは type: "spring" を使うなど
       }}
       className="p-6 max-w-3xl mx-auto space-y-8"
       onAnimationStart={() => document.body.classList.add("overflow-hidden")}

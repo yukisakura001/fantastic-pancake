@@ -471,17 +471,12 @@ export default function ToolAPage() {
   // ------------------------ JSX ------------------------ //
   return (
     <motion.div
-      initial={{ opacity: 0, y: 100 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, x: "100%" }} // 右から開始
+      animate={{ opacity: 1, x: 0 }} // 左へ移動して表示
       transition={{
         duration: 0.8,
         ease: "easeInOut",
-        // もしくは type: "spring" を使うなど
       }}
-      onAnimationStart={() => document.body.classList.add("overflow-hidden")}
-      onAnimationComplete={() =>
-        document.body.classList.remove("overflow-hidden")
-      }
       className="container mx-auto p-4"
     >
       {/* CSVファイルの読み込み + エンコーディング選択 + ダウンロードボタン */}
