@@ -199,10 +199,12 @@ function calc_inclined_payment(
 
 export default function Page() {
   const initialRolePeopleList = [
-    { role: "部長", num: 7 },
-    { role: "課長", num: 5 },
-    { role: "課長代理", num: 7 },
-    { role: "部下", num: 5 },
+    { role: "プリンシパル以上", num: 1 },
+    { role: "シニアマネージャー相当", num: 3 },
+    { role: "マネージャー担当", num: 4 },
+    { role: "シニアコンサルタント相当", num: 6 },
+    { role: "コンサル担当", num: 6 },
+    { role: "アナリスト相当", num: 8 },
   ];
 
   const [rolePeopleList, setRolePeopleList] = useState<
@@ -211,8 +213,8 @@ export default function Page() {
 
   const [ModalOpen, setModalOpen] = useState(false);
 
-  const [totalAmount, setTotalAmount] = useState(97560);
-  const [defaultTilt, setDefaultTilt] = useState(50);
+  const [totalAmount, setTotalAmount] = useState(152590);
+  const [defaultTilt, setDefaultTilt] = useState(30);
   const [usageFlag, setUsageFlag] = useState(false);
 
   const [userRole, setUserRole] = useState(

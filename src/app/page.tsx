@@ -8,14 +8,10 @@ export default function HomePage() {
         トッピング一覧
       </h1>
       <div
-        className="
-          grid
-          grid-cols-1
-          sm:grid-cols-2
-          md:grid-cols-3
-          lg:grid-cols-4
-          gap-4
-        "
+        className="grid gap-4 justify-center"
+        style={{
+          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 300px))",
+        }}
       >
         {metaData.map((tool) => (
           <ToolCard

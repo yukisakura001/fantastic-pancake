@@ -16,8 +16,7 @@ export default function ToolCard({ title, description, slug }: ToolCardProps) {
         transition-all
         hover:shadow-xl hover:scale-105 hover:bg-amber-500
         flex flex-col items-start
-        w-full max-w-xs mx-auto
-        h-36
+        w-full
       "
     >
       <h2 className="text-xl font-bold text-yellow-100 mb-3">{title}</h2>
